@@ -9,6 +9,9 @@ import redirectObj from './redirects';
 // Status code as a global constant; we want to use 308 Permanent
 const STATUS_CODE = 308;
 
+// new website for /en-int
+const NEW_EN_INT = `https://www.scaffolding-sales.com/`;
+
 // Initial eventlistener
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request))
@@ -26,10 +29,15 @@ const handleRequest = async (request) => {
   const url = new URL(request.url);
   const pathname = url.pathname; // Get the pathname of the request
 
+  // /en-int has been decommissioned; so any request requires to redirect to the new domain.
+  if (pathname.startsWith(`/en-int`)) {
+    return Response.redirect(new URL(NEW_EN_INT, request.url), STATUS_CODE); 
+  }
+
   // Check of the pathname is within the mapping
   if (pathname in redirectObj) {
     // If it is, redirect to the new path
-    return Response.redirect(new URL(redirectObj[pathname], request.url), STATUS_CODE); // You can use 301 for permanent redirects
+    return Response.redirect(new URL(redirectObj[pathname], request.url), STATUS_CODE); 
   }
 
   // Redirect has not happened, fetch and return original request.
