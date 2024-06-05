@@ -28,6 +28,7 @@ addEventListener('fetch', event => {
 const handleRequest = async (request) => {
   const url = new URL(request.url);
   const pathname = url.pathname; // Get the pathname of the request
+  const country = request.cf.country;
 
   // /en-int has been decommissioned; so any request requires to redirect to the new domain.
   if (pathname.startsWith(`/en-int`)) {
@@ -38,6 +39,34 @@ const handleRequest = async (request) => {
   if (pathname in redirectObj) {
     // If it is, redirect to the new path
     return Response.redirect(new URL(redirectObj[pathname], request.url), STATUS_CODE); 
+  }
+  
+  // if we are the root site, redirect based on country
+  if (pathname == `/`) {
+    if (country == 'IE') {
+      return Response.redirect(`/en-ie`); 
+    }
+    
+    if (country == 'GB') {
+      return Response.redirect(`/en-gb`); 
+    }
+    
+    return Response.redirect(`/rotw`);    
+  }
+  
+  // force /gb/ to redirect to /en-gb/
+  if (pathname.startsWith(`/gb/`)) {
+    return Response.redirect(new URL(pathname.replace(`/gb/`, `/en-gb/`), request.url), STATUS_CODE); 
+  }
+  
+  // force /ie/ to redirect to /en-ie/
+  if (pathname.startsWith(`/ie/`)) {
+    return Response.redirect(new URL(pathname.replace(`/ie/`, `/en-ie/`), request.url), STATUS_CODE); 
+  }
+  
+  // force /export/ to redirect to /rotw/
+  if (pathname.startsWith(`/export/`)) {
+    return Response.redirect(new URL(pathname.replace(`/export/`, `/rotw/`), request.url), STATUS_CODE); 
   }
 
   // Redirect has not happened, fetch and return original request.
